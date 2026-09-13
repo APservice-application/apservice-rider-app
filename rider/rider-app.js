@@ -256,6 +256,7 @@
       };
       $('#proofLibrary')?.addEventListener('change', event => uploadProof(event.target));
       $('#proofCamera')?.addEventListener('change', event => uploadProof(event.target));
+      try { window.APOrderChat?.mount({ M, orderId: id, selfRole: 'rider', userId: ctx.user.id, target: '#job' }); } catch (_) {}
       let statusSaveInFlight = false;
       $('#save')?.addEventListener('click', async event => {
         const next = nextStep;
