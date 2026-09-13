@@ -6,6 +6,24 @@
   const h = M.ui.escapeHtml;
   const page = document.body.dataset.page;
   const params = new URLSearchParams(location.search);
+  const ensurePushScripts = onReady => {
+    if (window.APPush) { onReady(); return; }
+    if (document.getElementById('rider-push-script')) return;
+    const config = document.createElement('script');
+    config.src = '../shared/ap-push-config.js?v=push-v1';
+    config.onload = () => {
+      const lib = document.createElement('script');
+      lib.id = 'rider-push-script'; lib.src = '../shared/ap-push.js?v=push-v1';
+      lib.onload = onReady; lib.onerror = () => {};
+      document.head.appendChild(lib);
+    };
+    config.onerror = () => {};
+    document.head.appendChild(config);
+  };
+  const bootPush = () => ensurePushScripts(() => { try {
+    window.APPush?.init({ request: (path, options) => M.request(path, options), currentUser: () => M.auth.currentUser(), notify: (title, body) => M.ui.setNotice(`${title} · ${body}`, 'info') });
+  } catch (_) {} });
+  try { Promise.resolve(M.auth.sessionRestoreReady).then(() => M.auth.currentUser()).then(user => { if (user) bootPush(); }).catch(() => {}); } catch (_) {}
   const pageScope = name => { const scope = M.network.createScope(name); addEventListener('pagehide', () => scope.dispose(), { once: true }); return scope; };
   const links = [['dashboard', 'ภาพรวม', '⌂'], ['jobs', 'งาน', '▣'], ['earnings', 'รายได้', '฿'], ['notifications', 'แจ้งเตือน', '♢']];
   const secondaryLinks = [['profile', 'โปรไฟล์', '◉'], ['settings', 'ตั้งค่า', '⚙']];
